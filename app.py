@@ -11,6 +11,12 @@ ACCESS_TOKEN = environ.get('ACCESS_TOKEN')
 VERIFY_TOKEN = environ.get('VERIFY_TOKEN')
 bot = Bot(ACCESS_TOKEN)
 
+bot.set_get_started({ 
+  "get_started":{
+    "payload":"GET_STARTED_PAYLOAD"
+  }
+})
+
 # Importing standard route and two requst types: GET and POST.
 # We will receive messages that Facebook sends our bot at this endpoint
 @app.route('/', methods=['GET', 'POST'])
@@ -28,33 +34,39 @@ def receive_message():
         for event in output['entry']:
             messaging = event['messaging']
             for message in messaging:
+                if 'postback' in message:
+                    recipient_id = message['sender']['id']
+                    response_text = "Salut, comment ça va ?"
+                    bot.send_button_message(recipient_id, response_text, ['😁', '😊', '😕', '🙁'])
                 if message.get('message'):
                     # Facebook Messenger ID for user so we know where to send response back to
                     recipient_id = message['sender']['id']
-                    if message['message'].get('text'): 
-                        
-                        #################### 
-                        # TODO:
-                        # on receive_message check if all topics are treated,               
-                        # if all topics are not treated yet  
-                        # session['key'] = 'value'                               
-                        # - send message['message']['text'] to ML *relance* service.
-                        # then receive boolean response from ML service, 
-                        # - send *relance* to user based on (hard coded) *relance* in the app,
-                        # - mark topic as "treated" in topic list (in session).
-                        # elif all topics are treated, 
-                        # - send message['message']['text'] to ML *recommendation* service
-                        # then receive url/text from ML service
-                        # - send url/text to user
-                        # empty all session data
-                        #####################
-
-                        response_sent_text = get_message() 
-                        send_message(recipient_id, response_sent_text)
-                    # if user send us a GIF, photo, video or any other non-text item
-                    if message['message'].get('attachments'):
-                        response_sent_text = get_message()
-                        send_message(recipient_id, response_sent_text)
+                    if message['message'].get('text'):
+                        text = message['message']['text']
+                        recipient_id = message['sender']['id']
+                        if (text == 'Salut Tamalou'):
+                            response_text = "Salut, comment ça va ?"
+                            bot.send_button_message(recipient_id, response_text, ['😁', '😊', '😕', '🙁'])
+                        if (text == '😁' | text == '😊'| text == '😕' | text == '🙁'):
+                            session['smiley'] = text
+                            bot.send_message(recipient_id, "Dis-m'en plus !")
+                        else:
+                            add_to_session_messages(text)
+                            smiley = session.get('smiley')
+                            if (smiley == '😁' | smiley == '😊'):
+                                send_message(recipient_id, get_message())
+                                send_message(recipient_id, get_recommended_content_url())
+                            else:
+                                if all_topics_treated():
+                                    send_message(recipient_id, get_recommended_content_url())
+                                    empty_message()
+                                    empty_treated_topics()
+                                else:
+                                    treated_topics = get_treated_topic() # send message to ML service
+                                    for topic_name in treated_topics:
+                                        set_treated_topic(topic_name)
+                                    send_reopening = get_highest_priority_reopening()
+                                    send_message(recipient_id, send_reopening)
     return "Message Processed"
 
 
@@ -149,6 +161,9 @@ def empty_treated_topics():
     for topic in topic_map:
         session.pop(topic.name)
 
+def empty_message():
+    session.pop('message')
+
 def get_highest_priority_reopening(treated_topics):
     reopening = ""
     priority = 0
@@ -161,10 +176,8 @@ def get_highest_priority_reopening(treated_topics):
 # ML simulators
 def get_treated_topic():
     # TODO: integrate machine learning model
-    sample_responses = ["Humeur", "Inquiétude",
-                        "Temporalité", "Contexte", "Evolution"]
-    return random.choice(sample_responses)
+    return ["Humeur", "Inquiétude"]
 
-def get_recommended_content_url():
+def get_recommended_content_url(message):
     # TODO: integrate machine learning model
     return 'https://dcap-research.fr/'
