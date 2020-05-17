@@ -11,11 +11,13 @@ ACCESS_TOKEN = environ.get('ACCESS_TOKEN')
 VERIFY_TOKEN = environ.get('VERIFY_TOKEN')
 bot = Bot(ACCESS_TOKEN)
 
+"""
 bot.set_get_started({ 
   "get_started":{
     "payload":"GET_STARTED_PAYLOAD"
   }
 })
+"""
 
 # Importing standard route and two requst types: GET and POST.
 # We will receive messages that Facebook sends our bot at this endpoint

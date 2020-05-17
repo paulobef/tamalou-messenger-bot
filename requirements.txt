@@ -4,3 +4,4 @@ gunicorn==20.0.4
 pymessenger==0.0.7.0
 flask-session 
 redis
+python-dotenv
