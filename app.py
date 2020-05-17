@@ -1,6 +1,6 @@
 import random
 from flask import Flask, request, session
-from flask.ext.session import Session
+from flask_session import Session
 from pymessenger.bot import Bot
 from os import environ
 
