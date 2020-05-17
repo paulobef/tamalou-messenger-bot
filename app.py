@@ -37,10 +37,8 @@ def receive_message():
                     recipient_id = message['sender']['id']
                     if message['message'].get('text'):
                         text = message['message']['text']
-                        recipient_id = message['sender']['id']
-                        if (text == 'Salut Tamalou'):
-                            response_sent_text = get_message() 
-                            send_message(recipient_id, response_sent_text)
+                        send_message(recipient_id, text)
+                        if (text == "Salut Tamalou"):
                             response_text = "Salut, comment ça va ?"
                             bot.send_button_message(recipient_id, response_text, ['😁', '😊', '😕', '🙁'])
                         if (text == '😁' | text == '😊'| text == '😕' | text == '🙁'):
@@ -64,41 +62,6 @@ def receive_message():
                                     send_reopening = get_highest_priority_reopening()
                                     send_message(recipient_id, send_reopening)
 
-            
-
-
-
-
-
-
-
-                    
-
-                        #################### 
-                        # TODO:
-                        # on receive_message check if all topics are treated,               
-                        # if all topics are not treated yet  
-                        # session['key'] = 'value'                               
-                        # - send message['message']['text'] to ML *relance* service.
-                        # then receive boolean response from ML service, 
-                        # - send *relance* to user based on (hard coded) *relance* in the app,
-                        # - mark topic as "treated" in topic list (in session).
-                        # elif all topics are treated, 
-                        # - send message['message']['text'] to ML *recommendation* service
-                        # then receive url/text from ML service
-                        # - send url/text to user
-                        # empty all session data
-                        #####################
-
-
-                        
-
-                        response_sent_text = get_message() 
-                        send_message(recipient_id, response_sent_text)
-                    # if user send us a GIF, photo, video or any other non-text item
-                    if message['message'].get('attachments'):
-                        response_sent_text = get_message()
-                        send_message(recipient_id, response_sent_text)
     return "Message Processed"
 
 
