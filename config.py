@@ -11,6 +11,5 @@ class Config:
     FLASK_APP = environ.get('FLASK_APP')
     FLASK_ENV = environ.get('FLASK_ENV')
 
-    # Flask-Session
-    SESSION_TYPE = environ.get('SESSION_TYPE')
-    SESSION_REDIS = redis.from_url(environ.get('SESSION_REDIS'))
+    # Flask-Redis
+    REDIS_URL = environ.get('REDIS_URL')

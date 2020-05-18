@@ -1,7 +1,6 @@
 
-Flask==1.1.1
+Flask
 gunicorn==20.0.4
-pymessenger==0.0.7.0
-flask-session 
-redis
+pymessenger
+flask-redis 
 python-dotenv
