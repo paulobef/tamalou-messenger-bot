@@ -1,9 +1,13 @@
 import random
-from flask import Flask, request, session
+from flask import Flask, request
 from flask_redis import FlaskRedis
 from pymessenger.bot import Bot
+from redis_session import RedisSessionManager
 from os import environ
 import json
+from feature.sensation.topics import TOPIC_MAP
+from feature.sensation.conversation import SensationConversationUtils
+
 
 app = Flask(__name__)
 app.config.from_object('config.Config')     # Initializing our Flask application
@@ -30,6 +34,9 @@ def receive_message():
         for event in output['entry']:
             messaging = event['messaging']
             message = messaging[0]
+            recipient_id = message['sender']['id']
+            session = RedisSessionManager(recipient_id, redis_client) # custom server-side "session" communicator
+            utils = SensationConversationUtils(session, TOPIC_MAP)
             # handle postbacks
             if 'postback' in message: 
                 recipient_id = message['sender']['id']
@@ -46,45 +53,41 @@ def receive_message():
                     return "ok", 200
                 if payload in ['😁', '😊', '😕', '🙁']:
                     try:
-                        set_in_session(recipient_id, 'smiley', payload)
+                        session.set_key('smiley', payload)
                     except:
                         raise Exception
                     response_text = "Dis-m'en plus !"
                     bot.send_text_message(recipient_id, response_text)
                     return "ok", 200
             # handle messages
-            if message.get('message'):
+            if 'message' in message:
                 # Facebook Messenger ID for user so we know where to send response back to
-                recipient_id = message['sender']['id']
                 if message['message'].get('text'):
                     text = message['message']['text']
-                    #send_message(recipient_id, text)
                     if (text == "Salut Tamalou"):
-                        empty_session(recipient_id)
+                        session.empty()
                         response_text = "Salut, comment ça va ?"
                         button_list = create_json_button_list(['😁', '😊', '😕'])
                         bot.send_button_message(recipient_id, response_text, button_list)
                         return "ok", 200
                     else:
-                        add_to_session_messages(recipient_id, text)
-                        smiley = get_in_session(recipient_id, 'smiley')
+                        utils.add_to_message(text)
+                        smiley = session.get_key('smiley')
                         if smiley in ['😁', '😊']:
                             bot.send_text_message(recipient_id, 'Super ! Voici des contenus en lien avec ta situation')
                             bot.send_text_message(recipient_id, get_recommended_content_url()) # use ML service
                             return "ok", 200
                         else:
-                            if all_topics_treated(recipient_id):
+                            if utils.all_topics_treated():
                                 bot.send_text_message(recipient_id, 'Merci ! Voici des contenus en lien avec ta situation')
                                 bot.send_text_message(recipient_id, get_recommended_content_url()) # use ML service
-                                print(empty_session(recipient_id))
-                                print(redis_client.hgetall(recipient_id))
+                                session.empty()
                                 return "ok", 200
                             else:
-                                treated_topics = get_treated_topic()
-                                print(treated_topics) # use ML service
+                                treated_topics = get_treated_topic(session.get_key('message'))
                                 for topic_name in treated_topics:
-                                    set_treated_topic(recipient_id, topic_name)
-                                reopening_text = get_highest_priority_reopening(treated_topics)
+                                    utils.set_treated_topic(topic_name)
+                                reopening_text = utils.get_highest_priority_reopening(treated_topics)
                                 bot.send_text_message(recipient_id, reopening_text)
                                 return "ok", 200
 
@@ -99,104 +102,11 @@ def verify_fb_token(token_sent):
         return request.args.get("hub.challenge")
     return 'Invalid verification token'
 
-
-def get_message():
-    sample_responses = ["You are stunning!", "We're proud of you",
-                        "Keep on being you!", "We're greatful to know you :)"]
-    # return selected item to the user
-    return random.choice(sample_responses)
-
 # Add description here about this if statement.
 if __name__ == "__main__":
     app.run()
 
-
-# Tamalou topic map
-topic_map = [
-    {
-        "name": "humeur",
-        "reopening": "Tu te sens en forme ?",
-        "priority_level": 8
-    },
-    {
-        "name": "inquietude",
-        "reopening": "Est-ce que cela t'inquiète ?",
-        "priority_level": 7
-    },
-    {
-        "name": "temporalite",
-        "reopening": "Est-ce que ça dure depuis longtemps ? ça t'arrive souvent ?",
-        "priority_level": 6
-    },
-    {
-        "name": "contexte",
-        "reopening": "Est-ce que tu pense que c'est lié à quelque chose ?",
-        "priority_level": 5
-    },
-    {
-        "name": "intensite",
-        "reopening": "C'est une sensation plutôt forte ou légère ?",
-        "priority_level": 4
-    },
-    {
-        "name": "evolution",
-        "reopening": "Est-ce que tu as ressenti une évolution ces derniers temps ?",
-        "priority_level": 3
-    },
-  ]
-
-  
-
-# Tamalou services
-def add_to_session_messages(session_id, text):
-    previous_content = get_in_session(session_id, 'message')
-    if (previous_content):
-        set_in_session(session_id, 'message', f'{previous_content} {text}')
-    else:
-        set_in_session(session_id, 'message', text)
-
-def is_topic_treated(session_id, key_name):
-    return redis_client.hexists(session_id, key_name)
-
-def all_topics_treated(session_id):
-    session_key_list = redis_client.hkeys(session_id)
-    print(session_key_list)
-    for topic in topic_map:
-        if topic['name'] not in session_key_list:
-            return False
-        return True
-
-def set_treated_topic(session_id, key_name):
-    set_in_session(session_id, key_name, 'True')
-
-def empty_treated_topics(session_id):
-    topic_names = []
-    for topic in topic_map:
-        topic_names.append(topic['name'])
-    redis_client.hdel(session_id, *topic_names)
-
-def empty_message(session_id):
-    redis_client.hdel(session_id, 'message')
-
-def empty_session(session_id):
-    session_content_list = redis_client.hgetall(session_id)
-    if (len(session_content_list) > 0):
-        list = []
-        for key,value in session_content_list.items():
-            list.append(key)    
-        redis_client.hdel(session_id, *list)
-        return "session emptied"
-    return "session already emptied"
-
-def get_highest_priority_reopening(treated_topics):
-    reopening = ""
-    priority = 0
-    for topic in topic_map:
-        if (topic['priority_level'] >= priority and (topic['name'] not in treated_topics)):
-            reopening = topic['reopening']
-            priority = topic['priority_level']
-    return reopening
-
+# utils
 def create_json_button_list(title_list):
     button_list = []
     for title in title_list:
@@ -207,27 +117,20 @@ def create_json_button_list(title_list):
         })
     return json.dumps(button_list)
 
-# redis utils
-def set_in_session(session_id, key, value):
-    redis_client.hmset(session_id, {
-        key: value
-    })
-    return 'done'
-
-
-def get_in_session(session_id, key):
-    if redis_client.hexists(session_id, key):
-        return redis_client.hget(session_id, key)
-    else:
-        return False
-
-
 # ML simulators
-def get_treated_topic():
+def get_treated_topic(message):
     # TODO: integrate machine learning model
-    return random.sample(["humeur", "intensite", "evolution", "contexte", "inquietude", "temporalite"], 2)
+    print(message)
+    return random.sample(["humeur", "intensite", "evolution", "contexte", "inquietude", "temporalite"], 4)
 
 def get_recommended_content_url():
     # TODO: integrate machine learning model
     return 'https://www.doctissimo.fr/'
+
+
+
+
+
+
+    
 
