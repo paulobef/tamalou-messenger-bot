@@ -5,3 +5,11 @@ pymessenger
 flask-redis 
 python-dotenv
 pylint
+fasttext
+tensorflow
+numpy
+keras
+spacy
+pyspellchecker
+googletrans
+pandas
