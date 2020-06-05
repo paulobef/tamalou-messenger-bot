@@ -1,3 +1,4 @@
+from flask_redis import FlaskRedis
 '''
 Implements "custom sessions" using redis hash data structure.
 for use in messenger bot, pass the sender id as the session id (which is simply the hash name)
@@ -5,7 +6,7 @@ for use in messenger bot, pass the sender id as the session id (which is simply 
 
 class RedisSession:
 
-    def __init__(self, session_id: str, redis_client):
+    def __init__(self, session_id: str, redis_client: FlaskRedis):
         self.session_id = session_id
         self.redis_client = redis_client
 
@@ -40,3 +41,6 @@ class RedisSession:
             self.redis_client.hdel(self.session_id, *list)
             return "session emptied"
         return "session was already emptied"
+    
+    def delete(self):
+        self.redis_client.delete(self.session_id)

@@ -9,7 +9,7 @@ import re
 
 
 # fonction auxiliaire de nettoyage de texte
-def remove_ponctuation(s):
+def remove_ponctuation(s: str):
     s=s.replace("!","")
     s=s.replace(".","")
     s=s.replace(",","")
@@ -46,7 +46,7 @@ for topic in vect_topics:
 # pour un thème donné)
 # output :
 # - un dictionnaire dont les clés correspondent aux thèmes d'intérêt et les valeurs associées correspondent aux scores bruts
-def topic_scoring(text, nb_rank_word = 4):
+def topic_scoring(text: str, nb_rank_word = 4):
     
     # on enleve la ponctuation du texte
     text_np = remove_ponctuation(text)
