@@ -5,10 +5,8 @@ Date: 29/05/2020
 import fasttext.util
 import numpy as np
 import tensorflow as tf
-import re
-import os
-import dropbox
-from flaskr.utils.dropbox_connector import DropboxConnector
+
+
 
 # fonction auxiliaire de nettoyage de texte
 def remove_ponctuation(s: str):
@@ -23,30 +21,8 @@ def remove_ponctuation(s: str):
     return s
 
 
-if not os.path.isdir('ml_models'):
-    # get proprietary models from dropbox location
-    dbx_token = os.environ.get('DROPBOX_ACCESS_TOKEN')
-    dbx_app_folder_path = '/'
-    dbx = dropbox.Dropbox(dbx_token)
-    dbx_connector = DropboxConnector(dbx_app_folder_path, dbx)
-    dbx_connector.download_folder('ml_models', './ml_models.zip')
-    print('downloaded proprietary models')
-
-# get fast text model from fast text website
-fasttext.util.download_model('fr', if_exists='ignore')
-print('downloaded fasttext model')
-
-# make space by deleting zip files
-if os.path.isfile('cc.fr.300.bin.gz'):
-    os.remove('cc.fr.300.bin.gz')
-if os.path.isfile('ml_models.zip'):
-    os.remove('ml_models.zip')
-print('deleted model archives')
-
 # on charge le fichier qui permet de faire passer les textes dans un espace vectoriel à 300 dimensions (via un modèle pré-entrainé par équipe IA de Facebook)
 ft = fasttext.load_model('cc.fr.300.bin')
-
-
 
 # on definit la structure qui va contenir les valeurs de prediction pour chaque thème
 # vecteur des topics d'interet
