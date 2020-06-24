@@ -1,4 +1,4 @@
-#!/Users/paulbeffa/projects/tamalou-messenger-bot/venv/bin/python
+#!/home/paulobef/projects/tamalou-messenger-bot/venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

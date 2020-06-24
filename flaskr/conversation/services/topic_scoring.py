@@ -6,23 +6,46 @@ import fasttext.util
 import numpy as np
 import tensorflow as tf
 import re
-
+import os
+import dropbox
+from flaskr.utils.dropbox_connector import DropboxConnector
 
 # fonction auxiliaire de nettoyage de texte
 def remove_ponctuation(s: str):
-    s=s.replace("!","")
-    s=s.replace(".","")
-    s=s.replace(",","")
-    s=s.replace(";","")
-    s=s.replace(";","")
-    s=s.replace("?","")
-    s=s.replace("/","")
-    s=s.replace("#","")
+    s = s.replace("!", "")
+    s = s.replace(".", "")
+    s = s.replace(",", "")
+    s = s.replace(";", "")
+    s = s.replace(";", "")
+    s = s.replace("?", "")
+    s = s.replace("/", "")
+    s = s.replace("#", "")
     return s
 
 
+if not os.path.isdir('ml_models'):
+    # get proprietary models from dropbox location
+    dbx_token = os.environ.get('DROPBOX_ACCESS_TOKEN')
+    dbx_app_folder_path = '/'
+    dbx = dropbox.Dropbox(dbx_token)
+    dbx_connector = DropboxConnector(dbx_app_folder_path, dbx)
+    dbx_connector.download_folder('ml_models', './ml_models.zip')
+    print('downloaded proprietary models')
+
+# get fast text model from fast text website
+fasttext.util.download_model('fr', if_exists='ignore')
+print('downloaded fasttext model')
+
+# make space by deleting zip files
+if os.path.isfile('cc.fr.300.bin.gz'):
+    os.remove('cc.fr.300.bin.gz')
+if os.path.isfile('ml_models.zip'):
+    os.remove('ml_models.zip')
+print('deleted model archives')
+
 # on charge le fichier qui permet de faire passer les textes dans un espace vectoriel à 300 dimensions (via un modèle pré-entrainé par équipe IA de Facebook)
-ft = fasttext.load_model('flaskr/ml_models/cc.fr.300.bin')
+ft = fasttext.load_model('cc.fr.300.bin')
+
 
 
 # on definit la structure qui va contenir les valeurs de prediction pour chaque thème
@@ -34,8 +57,8 @@ dict_model = dict()
 
 # pour chaque topic, on enregistre dans le dictionnaire le modèle associé
 for topic in vect_topics:
-    name_model = "my_model_"+topic+".h5"
-    dict_model[topic] = tf.keras.models.load_model('flaskr/ml_models/'+name_model)
+    name_model = "my_model_" + topic + ".h5"
+    dict_model[topic] = tf.keras.models.load_model('ml_models/' + name_model)
 
 
 # on définit la fonction qui permet de calculer les scores (bruts) pour un texte donné sur l'ensemble des thèmes
@@ -46,30 +69,30 @@ for topic in vect_topics:
 # pour un thème donné)
 # output :
 # - un dictionnaire dont les clés correspondent aux thèmes d'intérêt et les valeurs associées correspondent aux scores bruts
-def topic_scoring(text: str, nb_rank_word = 4):
-    
+def topic_scoring(text: str, nb_rank_word=4):
     # on enleve la ponctuation du texte
     text_np = remove_ponctuation(text)
     # on recupere l'ensemble des mots 
-    all_words =  text_np.split(" ")
+    all_words = text_np.split(" ")
     # on calcule les embeddings sur chaque mots
-    all_words_embeddings = list(map(lambda word: ft.get_word_vector(word),all_words))
+    all_words_embeddings = list(map(lambda word: ft.get_word_vector(word), all_words))
     # on initialise la valeur de sortie qui correspond à un dictionnaire avec une valeur de score par thème
     dict_score_topic = dict()
     for topic_of_interest in vect_topics:
         model_topic = dict_model[topic_of_interest]
-        
+
         # on calcule la valeur du modele pour l'ensemble des mots
         value_model = tf.get_static_value(model_topic.predict(np.asarray(all_words_embeddings)))
-        value_model_prob = list(map(lambda x: x[1],value_model))
-        
+        value_model_prob = list(map(lambda x: x[1], value_model))
+
         # on recupere la valeur de proba du nb_rank_word mot au meilleur score
         value_model_prob_sorted_decreasing = sorted(value_model_prob, reverse=True)
-        val_score = value_model_prob_sorted_decreasing[nb_rank_word-1]
+        val_score = value_model_prob_sorted_decreasing[nb_rank_word - 1]
         # on remplit le dictionnaire avec la valeur de score trouvée pour le thème courant
         dict_score_topic[topic_of_interest] = val_score
-    
-    return(dict_score_topic)
+
+    return dict_score_topic
+
 
 """
 # TODO: Write this as a test

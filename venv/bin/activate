@@ -46,7 +46,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV='/Users/paulbeffa/projects/tamalou-messenger-bot/venv'
+VIRTUAL_ENV='/home/paulobef/projects/tamalou-messenger-bot/venv'
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
