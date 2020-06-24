@@ -21,3 +21,4 @@ dropbox
 pybind11
 tensorflow-cpu
 scipy==1.4.1
+wheel
