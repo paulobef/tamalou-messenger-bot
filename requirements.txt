@@ -19,3 +19,4 @@ redis~=3.5.3
 msrest~=0.6.16
 setuptools~=44.0.0
 dropbox
+pybind11
