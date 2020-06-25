@@ -18,7 +18,7 @@ msrest~=0.6.16
 setuptools~=44.0.0
 dropbox
 pybind11
-tensorflow-cpu
+tensorflow
 scipy==1.4.1
 wheel
 spacy>=2.2.0,<3.0.0

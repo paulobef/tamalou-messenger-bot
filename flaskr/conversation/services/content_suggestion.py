@@ -1,7 +1,9 @@
 from azure.cognitiveservices.search.websearch import WebSearchClient
 from msrest.authentication import CognitiveServicesCredentials
+from flask import current_app
 from flaskr.conversation.services.get_keywords_from_french import get_keywords_from_french
-from os import environ
+
+config = current_app.config
 
 
 # Instantiate the client and replace with your endpoint.
@@ -9,8 +11,8 @@ class ContentSuggestionService:
 
     def __init__(self):
         # config var for Bing Web Search (Azure cloud)
-        self.subscription_key = environ.get('SUBSCRIPTION_KEY')
-        self.endpoint = environ.get('ENDPOINT')
+        self.subscription_key = config['SUBSCRIPTION_KEY']
+        self.endpoint = config['ENDPOINT']
 
     @staticmethod
     def extract_keywords(text_in):

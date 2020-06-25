@@ -1,8 +1,7 @@
+from setuptools import setup
 
-from setuptools import setup, find_packages
-
-
-
-
-setup(name='tamalou_messenger_bot', version='1.0', packages=find_packages())
-
+setup(name='tamalou_messenger_bot', version='1.0', packages=['flaskr'],
+      include_package_data=True,
+      install_requires=[
+          'flask',
+      ], )

@@ -1,7 +1,5 @@
 import zipfile
 
-from dropbox.exceptions import ApiError
-
 
 class DropboxConnector:
 

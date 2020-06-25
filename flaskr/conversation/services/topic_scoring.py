@@ -7,7 +7,6 @@ import numpy as np
 import tensorflow as tf
 
 
-
 # fonction auxiliaire de nettoyage de texte
 def remove_ponctuation(s: str):
     s = s.replace("!", "")

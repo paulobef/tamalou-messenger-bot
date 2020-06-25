@@ -1,21 +1,24 @@
 from flaskr.conversation.services.content_suggestion import ContentSuggestionService
 from flaskr.conversation.services.topics import TopicsService
-from flask import current_app as app
-from flask import Blueprint, request
+from flask import Blueprint, request, current_app
 from pymessenger.bot import Bot
-from os import environ
-from flaskr import redis_client
-
+from flaskr.utils.download_models import download_models
 from flaskr.utils.redis_session import RedisSession
+from flaskr import redis_client, DropboxConnector
 import json
 from typing import List
+import dropbox
 
-# Messenger tokens
-ACCESS_TOKEN = environ.get('ACCESS_TOKEN')
-VERIFY_TOKEN = environ.get('VERIFY_TOKEN')
+config = current_app.config
 
 # Bot SDK (pymessenger)
-bot = Bot(ACCESS_TOKEN)
+bot = Bot(config['ACCESS_TOKEN'])
+
+# download the machine learning model from dropbox to use suggester and reopener
+dbx_app_folder_path = '/'
+dbx = dropbox.Dropbox(config['DROPBOX_ACCESS_TOKEN'])
+dbx_connector = DropboxConnector(dbx_app_folder_path, dbx)
+download_models(dbx_connector)
 
 # initiate content suggester
 suggester = ContentSuggestionService()
@@ -158,7 +161,7 @@ def receive_message():
 def verify_fb_token(token_sent):
     # take token sent by Facebook and verify it matches the verify token you sent
     # if they match, allow the request, else return an error
-    if token_sent == VERIFY_TOKEN:
+    if token_sent == config['VERIFY_TOKEN']:
         return request.args.get("hub.challenge")
     return 'Invalid verification token'
 
