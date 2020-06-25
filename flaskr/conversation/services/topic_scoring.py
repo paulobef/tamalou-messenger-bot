@@ -2,9 +2,21 @@
 Author: Romain Benassi
 Date: 29/05/2020
 """
+import dropbox
 import fasttext.util
 import numpy as np
 import tensorflow as tf
+from flask import current_app
+from flaskr import DropboxConnector
+from flaskr.utils.download_models import download_models
+
+config = current_app.config
+
+# download the machine learning model from dropbox to use suggester and reopener
+dbx_app_folder_path = '/'
+dbx = dropbox.Dropbox(config['DROPBOX_ACCESS_TOKEN'])
+dbx_connector = DropboxConnector(dbx_app_folder_path, dbx)
+download_models(dbx_connector)
 
 
 # fonction auxiliaire de nettoyage de texte

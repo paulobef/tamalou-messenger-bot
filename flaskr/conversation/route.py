@@ -14,12 +14,6 @@ config = current_app.config
 # Bot SDK (pymessenger)
 bot = Bot(config['ACCESS_TOKEN'])
 
-# download the machine learning model from dropbox to use suggester and reopener
-dbx_app_folder_path = '/'
-dbx = dropbox.Dropbox(config['DROPBOX_ACCESS_TOKEN'])
-dbx_connector = DropboxConnector(dbx_app_folder_path, dbx)
-download_models(dbx_connector)
-
 # initiate content suggester
 suggester = ContentSuggestionService()
 
