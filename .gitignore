@@ -139,4 +139,4 @@ cython_debug/
 
 # Machine Learning Models (project specific)
 ml_models/
-/cc.fr.300.bin
+cc.fr.300.bin
