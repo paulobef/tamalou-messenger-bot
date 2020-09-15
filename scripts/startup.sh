@@ -51,7 +51,7 @@ source /opt/app/tamalou-messenger-bot/venv/bin/activate
 chown -R pythonapp:pythonapp /opt/app
 
 # Put supervisor configuration in proper place
-cp /opt/app/tamalou-messenger-bot/python-app.conf /etc/supervisor/conf.d/tamalou-messenger-bot.conf
+cp /opt/app/tamalou-messenger-bot/tamalou-messenger-bot.conf /etc/supervisor/conf.d/tamalou-messenger-bot.conf
 
 # Start service via supervisorctl
 supervisorctl reread
