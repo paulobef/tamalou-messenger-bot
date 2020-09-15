@@ -2,27 +2,29 @@
 Author: Romain Benassi
 Date: 29/05/2020
 """
-import dropbox
+# import dropbox
 import fasttext.util
 import numpy as np
 import tensorflow as tf
 from flask import current_app
-from flaskr import DropboxConnector
-from flaskr.utils.download_models import download_models
-import os
-import warnings
+# from flaskr import DropboxConnector
+# from flaskr.utils.download_models import download_models
+# import os
+# import warnings
+
 config = current_app.config
 
+
 # normally the models are already placed in the project by the startup script
-# if it's not the case, the app can download them at startup (WARNING: doesn't work if app is in whl format)
-if not os.path.isdir('ml_models'):
-    warnings.warn("big model files should already be in the project when the app starts. \
-    Downloading files as part of app start up isn't recommended as it won't run if the app is distributed in WHL format")
-    # download the machine learning model from dropbox to use suggester and reopener
-    dbx_app_folder_path = '/'
-    dbx = dropbox.Dropbox(os.environ.get('DROPBOX_ACCESS_TOKEN'))
-    dbx_connector = DropboxConnector(dbx_app_folder_path, dbx)
-    download_models(dbx_connector)
+# if it's not the case, the app can download them at startup using the code below (WARNING: doesn't work if app is in whl format)
+# if not os.path.isdir('ml_models'):
+#  warnings.warn("big model files should already be in the project when the app starts. \
+# Downloading files as part of app start up isn't recommended as it won't run if the app is distributed in WHL format")
+# download the machine learning model from dropbox to use suggester and reopener
+# dbx_app_folder_path = '/'
+# dbx = dropbox.Dropbox(os.environ.get('DROPBOX_ACCESS_TOKEN'))
+# dbx_connector = DropboxConnector(dbx_app_folder_path, dbx)
+# download_models(dbx_connector)
 
 
 # fonction auxiliaire de nettoyage de texte
