@@ -30,18 +30,28 @@ useradd -m -d /home/pythonapp pythonapp
 
 # Fetch source code
 export HOME=/root
-git clone https://github.com/GoogleCloudPlatform/getting-started-python.git /opt/app
+git clone https://github.com/paulobef/tamalou-messenger-bot.git /opt/app/tamalou-messenger-bot
+
+# remove any virtual env in the repo
+rm -rf /opt/app/tamalou-messenger-bot/venv
+
+# copy .env file in project
+cp /opt/app/.env /opt/app/tamalou-messenger-bot
+
+# move needed models into project (copy won't do it as it needs lotta spaaaaaace)
+mv /opt/app/*.h5 opt/app/tamalou-messenger-bot/ml_models
+mv /opt/app/cc.fr.300.bin opt/app/tamalou-messenger-bot
 
 # Python environment setup
-virtualenv -p python3 /opt/app/gce/env
-source /opt/app/gce/env/bin/activate
-/opt/app/gce/env/bin/pip install -r /opt/app/gce/requirements.txt
+virtualenv -p python3 /opt/app/tamalou-messenger-bot/venv
+source /opt/app/tamalou-messenger-bot/venv/bin/activate
+/opt/app/tamalou-messenger-bot/venv/bin/pip install -r /opt/app/tamalou-messenger-bot/requirements.txt
 
 # Set ownership to newly created account
 chown -R pythonapp:pythonapp /opt/app
 
 # Put supervisor configuration in proper place
-cp /opt/app/gce/python-app.conf /etc/supervisor/conf.d/python-app.conf
+cp /opt/app/tamalou-messenger-bot/python-app.conf /etc/supervisor/conf.d/tamalou-messenger-bot.conf
 
 # Start service via supervisorctl
 supervisorctl reread
