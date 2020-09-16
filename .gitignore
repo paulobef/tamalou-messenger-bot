@@ -138,5 +138,5 @@ dmypy.json
 cython_debug/
 
 # Machine Learning Models (project specific)
-ml_models/
+ml_models/*
 cc.fr.300.bin

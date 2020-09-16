@@ -39,8 +39,8 @@ rm -rf /opt/app/tamalou-messenger-bot/venv
 cp /opt/app/.env /opt/app/tamalou-messenger-bot
 
 # move needed models into project (copy won't do it as it needs lotta spaaaaaace)
-mv /opt/app/*.h5 opt/app/tamalou-messenger-bot/ml_models
-mv /opt/app/cc.fr.300.bin opt/app/tamalou-messenger-bot
+mv /opt/app/ml_models/*.h5 opt/app/tamalou-messenger-bot/ml_models/
+mv /opt/app/cc.fr.300.bin opt/app/tamalou-messenger-bot/cc.fr.300.bin
 
 # Python environment setup
 virtualenv -p python3 /opt/app/tamalou-messenger-bot/venv
