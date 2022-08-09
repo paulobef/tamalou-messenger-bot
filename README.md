@@ -12,4 +12,4 @@ Technologies :
 * Tensorflow (for training custom models, using pre-trained models ans utilities)
 * Fasttext (utilities & pre-trained models)
 
-Test version currently deployed on a Google Cloud Compute VM
+Test version formerly deployed on a Google Cloud Compute VM
