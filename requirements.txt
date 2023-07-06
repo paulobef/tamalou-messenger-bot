@@ -19,7 +19,7 @@ setuptools~=44.0.0
 dropbox
 pybind11
 tensorflow
-scipy==1.4.1
+scipy==1.10.0
 wheel
 spacy>=2.2.0,<3.0.0
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.3.0/en_core_web_sm-2.3.0.tar.gz#egg=en_core_web_s
